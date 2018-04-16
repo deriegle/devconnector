@@ -22,14 +22,14 @@ router.post("/register", (req, res) => {
   // Validate new User
   const { errors, isValid } = validateRegisterInput(req.body);
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.status(404).json(errors);
   }
 
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
       errors.email = "Email already exists";
       // User is already registered in DB
-      return res.status(400).json(errors);
+      return res.status(404).json(errors);
     } else {
       const avatar = gravatar.url(req.body.email, {
         s: "200", // Size of Image
@@ -63,7 +63,7 @@ router.post("/register", (req, res) => {
 router.post("/login", (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.status(404).json(errors);
   }
 
   const email = req.body.email;
@@ -73,14 +73,14 @@ router.post("/login", (req, res) => {
     // User isn't found in DB
     if (!user) {
       errors.email = "User not found";
-      return res.status(400).json(errors);
+      return res.status(404).json(errors);
     }
     // Check password
     bcrypt.compare(password, user.password).then(isMatch => {
       if (!isMatch) {
         errors.password = "Password incorrect";
         // Password doesn't match
-        return res.status(400).json(errors);
+        return res.status(404).json(errors);
       } else {
         // Create paylod for JWT & sign token
         const payload = {
