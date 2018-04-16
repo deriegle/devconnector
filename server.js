@@ -1,9 +1,19 @@
 const users = require("./routes/api/users");
 const posts = require("./routes/api/posts");
 const profile = require("./routes/api/profile");
+const passport = require("passport");
+const bodyParser = require("body-parser");
 const app = require("express")();
 const mongoose = require("mongoose");
 const PORT = process.env.PORT || 5000;
+
+// Middleware
+//    BodyParser
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+//     Passport
+app.use(passport.initialize());
+require("./config/passport")(passport);
 
 // Mongo config & connect
 const db = require("./config/keys").mongoURI;
@@ -12,7 +22,7 @@ mongoose
   .then(() => console.info("MongoDB Connected"))
   .catch(err => console.error(err));
 
-app.get("/", (req, res) => res.send("Hello"));
+// Passport middleware
 
 app.use("/api/users", users);
 app.use("/api/profile", profile);
