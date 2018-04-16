@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const key = require("../../config/keys").secretOrKey;
 const passport = require("passport");
 const validateRegisterInput = require("../../validation/register");
+const validateLoginInput = require("../../validation/login");
 
 // @route   GET /api/users/test
 // @desc    Tests Users Route
@@ -60,17 +61,26 @@ router.post("/register", (req, res) => {
 // @desc    Login User / Return JWT
 // @access  Public
 router.post("/login", (req, res) => {
+  const { errors, isValid } = validateLoginInput(req.body);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const email = req.body.email;
   const password = req.body.password;
 
   User.findOne({ email: req.body.email }).then(user => {
     // User isn't found in DB
-    if (!user) return res.status(400).json({ email: "User not found" });
+    if (!user) {
+      errors.email = "User not found";
+      return res.status(400).json(errors);
+    }
     // Check password
     bcrypt.compare(password, user.password).then(isMatch => {
       if (!isMatch) {
+        errors.password = "Password incorrect";
         // Password doesn't match
-        return res.status(400).json({ password: "Password incorrect" });
+        return res.status(400).json(errors);
       } else {
         // Create paylod for JWT & sign token
         const payload = {
