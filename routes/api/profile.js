@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
+const validateProfileInput = require("../../validation/profile");
 
 // @route   GET /api/profile/test
 // @desc    Tests Profile Route
@@ -38,6 +39,10 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    // Validate Profile Information
+    const { errors, isValid } = validateProfileInput(req.body);
+    if (!isValid) return res.status(400).json(errors);
+
     // Get Profile Fields
     const profileFields = {};
     profileFields.user = req.user.id;
